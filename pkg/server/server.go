@@ -332,6 +332,11 @@ func (n *server) HandleEvent(e serf.Event) {
 	}
 }
 
+// 1. 从一致性哈希环中找到距离 shardID 分片最近的 3 个节点。
+// 这些节点将被用于存储该分片的数据，或者处理与该分片相关的请求。
+// 如果某个节点故障，其他节点可以继续处理该分片的数据请求，保证系统的容错性。
+//
+// 2. 检查当前节点是否为分片的领导者
 func (n *server) scheduleShards(ctx context.Context) error {
 	timer := time.NewTimer(5 * time.Second)
 	for {
@@ -346,7 +351,9 @@ func (n *server) scheduleShards(ctx context.Context) error {
 				timer.Reset(30 * time.Second)
 				continue
 			}
+
 			for shardID := 1; shardID < numShards+1; shardID++ {
+
 				members, err := n.consistent.GetClosestNForPartition(int(shardID)-1, 3)
 				if err != nil {
 					return fmt.Errorf("getting closest members: %w", err)
@@ -358,6 +365,7 @@ func (n *server) scheduleShards(ctx context.Context) error {
 					n.logger.Warn("Checking leadership", zap.Int("shard", shardID), zap.Error(err))
 					//return fmt.Errorf("checking leader: %w", err)
 				}
+
 				for _, member := range members {
 					if v, ok := n.raftAgents[uint64(shardID)]; n.config.ID() == member.String() && (!ok || !v) {
 						// We are the closest member to this shard, so we should schedule it.

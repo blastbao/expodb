@@ -1,7 +1,7 @@
 package machines
 
 type RaftEntry interface {
-	// By convention the messages self marshal and encode thier fsm type as the last
+	// Marshal By convention the messages self marshal and encode their fsm type as the last
 	// 2 bytes of the bytes.
 	Marshal() ([]byte, error)
 }
@@ -16,6 +16,6 @@ type StateMachine interface {
 	// Restore a subsection from snapshot for this state machine
 	Restore(data []byte) error
 
-	// Save state as bytes for snapshot for this state machine
+	// Persist Save state as bytes for snapshot for this state machine
 	Persist() ([]byte, error)
 }

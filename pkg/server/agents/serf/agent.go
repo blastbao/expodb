@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/project-sidonia/expodb/pkg/config"
 	"github.com/hashicorp/serf/serf"
+	"github.com/project-sidonia/expodb/pkg/config"
 	"go.uber.org/zap"
 )
 
@@ -47,7 +47,7 @@ type Agent struct {
 	shutdownLock sync.Mutex
 }
 
-// Start creates a new agent, potentially returning an error
+// New creates a new agent, potentially returning an error
 func New(config *config.Config, logger *zap.Logger) (*Agent, error) {
 	snapshotPath := path.Join(config.SerfDataDir, "serf_snapshot.serf")
 
